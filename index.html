@@ -1,142 +1,118 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VoiceForge</title>
-  <meta name="theme-color" content="#101020">
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; background: #101020; color: white;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      padding: 22px; border-bottom: 1px solid #303047;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .logo {
-      background: #7957ff; padding: 12px;
-      border-radius: 14px; font-size: 24px;
-    }
-    h1 { margin: 0; font-size: 23px; }
-    header p { margin: 5px 0 0; color: #aaaac4; font-size: 13px; }
-    main { max-width: 650px; margin: auto; padding: 24px 18px; }
-    .card {
-      background: #1a1a30; border: 1px solid #34344f;
-      border-radius: 18px; padding: 22px; margin-bottom: 18px;
-    }
-    h2 { font-size: 19px; margin-top: 0; }
-    label { display: block; color: #c8c8dc; margin: 15px 0 8px; }
-    input, select {
-      width: 100%; padding: 14px; border-radius: 10px;
-      border: 1px solid #44445f; background: #111124;
-      color: white; font-size: 16px;
-    }
-    button {
-      width: 100%; border: 0; border-radius: 11px;
-      padding: 15px; margin-top: 13px; font-size: 16px;
-      font-weight: bold; background: #7957ff; color: white;
-    }
-    button.secondary { background: #30304a; }
-    button:disabled { opacity: .5; }
-    .status { color: #c5c5dc; line-height: 1.6; }
-    .note { font-size: 13px; color: #aaaac4; line-height: 1.6; }
-    footer { text-align: center; padding: 22px; color: #8888a6; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoiceForge — Voice Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101020;color:#fff;font-family:Arial,sans-serif}
+header{padding:22px;background:#19192d;border-bottom:1px solid #34344e}
+header h1{margin:0;color:#a997ff}
+header p,.muted{color:#b7b7cf;line-height:1.5}
+main{max-width:650px;margin:auto;padding:18px}
+.card{background:#1b1b31;border:1px solid #383853;border-radius:16px;padding:20px;margin-bottom:18px}
+h2{font-size:20px;margin-top:0}
+label{display:block;margin:14px 0 8px;color:#d6d3ee}
+input[type=text],input[type=file],select{width:100%;padding:13px;border-radius:10px;background:#111124;border:1px solid #4a4968;color:white}
+button{width:100%;padding:14px;border:0;border-radius:10px;background:#8063ff;color:white;font-weight:bold;margin-top:12px;font-size:15px}
+button:disabled{opacity:.5}
+.status{font-size:14px;color:#c6baff;overflow-wrap:anywhere}
+audio{width:100%;margin-top:12px}
+.small{font-size:12px;color:#aaaac2;line-height:1.6}
+</style>
 </head>
 <body>
-  <header>
-    <div class="logo">🎙️</div>
-    <div>
-      <h1>VoiceForge</h1>
-      <p>Your voice. Your choice.</p>
-    </div>
-  </header>
+<header>
+<h1>🎙️ VoiceForge</h1>
+<p>Your voice studio — upload, preview and prepare your voice.</p>
+</header>
+<main>
+<section class="card">
+<h2>1. Upload a voice from your phone</h2>
+<p class="muted">Choose an audio recording saved on your device.</p>
+<label for="audioFile">Choose audio file</label>
+<input id="audioFile" type="file" accept="audio/*">
+<p id="fileStatus" class="status">No recording selected.</p>
+<audio id="audioPreview" controls hidden></audio>
+</section>
 
-  <main>
-    <section class="card">
-      <h2>Voice Studio</h2>
-      <p class="status">Choose a voice effect and test your microphone.</p>
+<section class="card">
+<h2>2. Create a voice clone</h2>
+<p class="muted">Prepare an authorized voice recording for a voice-cloning service.</p>
+<label for="voiceName">Name for your voice</label>
+<input id="voiceName" type="text" placeholder="e.g. My Voice">
+<label for="consent">Voice permission</label>
+<select id="consent">
+<option value="">Choose one</option>
+<option value="self">This is my own voice</option>
+<option value="permission">I have the person's permission</option>
+</select>
+<button id="cloneButton">Prepare voice clone</button>
+<p id="cloneStatus" class="status" role="status">
+A voice-cloning service must be connected before a real clone can be created.
+</p>
+<p class="small">Use only your own voice or a voice you have permission to clone. This page does not upload recordings to a server or create a voice clone yet.</p>
+</section>
 
-      <label for="voice">Voice effect</label>
-      <select id="voice">
-        <option value="normal">Normal voice</option>
-        <option value="deep">Deep voice</option>
-        <option value="bright">Bright voice</option>
-      </select>
+<section class="card">
+<h2>3. Voice effects</h2>
+<label for="effect">Select an effect</label>
+<select id="effect">
+<option>Normal</option>
+<option>Deep</option>
+<option>Bright</option>
+</select>
+<p class="small">Selecting an effect here does not yet change the uploaded recording or alter a live call.</p>
+</section>
+</main>
+<script>
+const picker=document.getElementById('audioFile');
+const preview=document.getElementById('audioPreview');
+const fileStatus=document.getElementById('fileStatus');
+let currentUrl=null;
 
-      <button id="mic">Test microphone</button>
-      <button id="stop" class="secondary" disabled>Stop microphone</button>
-      <p id="status" class="status" role="status">
-        Microphone is off.
-      </p>
-      <p class="note">
-        Microphone testing is local to this device. Selecting an effect
-        does not yet transform your voice in a call.
-      </p>
-    </section>
+picker.addEventListener('change',()=>{
+  const file=picker.files && picker.files[0];
+  if(currentUrl) URL.revokeObjectURL(currentUrl);
+  currentUrl=null;
+  preview.pause();
+  preview.removeAttribute('src');
+  preview.hidden=true;
 
-    <section class="card">
-      <h2>Internet Calling</h2>
-      <label for="contact">Contact or account ID</label>
-      <input id="contact" placeholder="Enter the other user's ID">
-      <button id="call" disabled>Internet call — setup required</button>
-      <p class="note">
-        Internet calls require a connected calling server and another
-        registered user. Those services are not connected yet.
-      </p>
-    </section>
+  if(!file){
+    fileStatus.textContent='No recording selected.';
+    return;
+  }
+  if(!file.type.startsWith('audio/')){
+    fileStatus.textContent='Please choose an audio file.';
+    picker.value='';
+    return;
+  }
+  currentUrl=URL.createObjectURL(file);
+  preview.src=currentUrl;
+  preview.hidden=false;
+  fileStatus.textContent='Selected: '+file.name+' ('+(file.size/1024/1024).toFixed(2)+' MB)';
+});
 
-    <section class="card">
-      <h2>Phone Number Calling</h2>
-      <label for="number">Phone number with country code</label>
-      <input id="number" type="tel" placeholder="+234...">
-      <button id="phone" class="secondary">Phone calling — setup required</button>
-      <p class="note">
-        Calling ordinary phone numbers requires a telephony provider,
-        account credentials, and appropriate permissions. No call will
-        be placed from this page.
-      </p>
-    </section>
-  </main>
-
-  <footer>VoiceForge · Built for clearer connections</footer>
-
-  <script>
-    const mic = document.getElementById('mic');
-    const stop = document.getElementById('stop');
-    const status = document.getElementById('status');
-    let stream;
-
-    mic.addEventListener('click', async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        status.textContent = 'Microphone is working. Your audio stays on this device.';
-        mic.disabled = true;
-        stop.disabled = false;
-      } catch (error) {
-        status.textContent =
-          'Microphone unavailable. Allow microphone access and open this site over HTTPS.';
-      }
-    });
-
-    stop.addEventListener('click', () => {
-      if (stream) stream.getTracks().forEach(track => track.stop());
-      stream = null;
-      status.textContent = 'Microphone is off.';
-      mic.disabled = false;
-      stop.disabled = true;
-    });
-
-    document.getElementById('call').addEventListener('click', () => {
-      alert('Calling server setup is still required.');
-    });
-
-    document.getElementById('phone').addEventListener('click', () => {
-      alert('A telephony provider must be connected before phone calls can work.');
-    });
-  </script>
+document.getElementById('cloneButton').addEventListener('click',()=>{
+  const permission=document.getElementById('consent').value;
+  const name=document.getElementById('voiceName').value.trim();
+  if(!picker.files.length){
+    document.getElementById('cloneStatus').textContent='Please select an audio recording first.';
+    return;
+  }
+  if(!name){
+    document.getElementById('cloneStatus').textContent='Please enter a name for the voice.';
+    return;
+  }
+  if(!permission){
+    document.getElementById('cloneStatus').textContent='Please confirm you have permission to clone this voice.';
+    return;
+  }
+  document.getElementById('cloneStatus').textContent='Your recording is selected and permission is confirmed. A real voice-cloning service still needs to be connected; no clone has been created or uploaded.';
+});
+</script>
 </body>
-        </html>
-        
+</html>
